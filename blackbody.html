@@ -1,0 +1,190 @@
+<h2 class="sr-only">Interactive blackbody curves with reference objects from a human body to hot stars</h2>
+<div style="font-size:13px; color:var(--text-secondary); margin:0 0 6px;">Reference objects (area set to 1×)</div>
+<div style="display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px;">
+  <button data-o="0">Human body</button>
+  <button data-o="1">Lava</button>
+  <button data-o="2">Light bulb</button>
+  <button data-o="3">Betelgeuse</button>
+  <button data-o="4">Sun</button>
+  <button data-o="5">Sirius</button>
+  <button data-o="6">Rigel</button>
+  <button data-o="7">Spica</button>
+</div>
+<div style="font-size:13px; color:var(--text-secondary); margin:0 0 6px;">Size and temperature scenarios</div>
+<div style="display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px;">
+  <button id="b1">Hotter, same size</button>
+  <button id="b2">Bigger, same temperature</button>
+  <button id="b3">Hotter but smaller</button>
+  <button id="b0">Reset</button>
+</div>
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px 24px; margin:0 0 12px;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <label for="T" style="font-size:14px; color:var(--text-secondary); min-width:88px;">Temperature</label>
+    <input type="range" id="T" min="250" max="30000" step="10" value="5000" style="flex:1;">
+    <span id="Tout" style="font-size:14px; font-weight:500; min-width:68px; text-align:right;">5,000 K</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <label for="A" style="font-size:14px; color:var(--text-secondary); min-width:88px;">Surface area</label>
+    <input type="range" id="A" min="0.1" max="10" step="0.1" value="1" style="flex:1;">
+    <span id="Aout" style="font-size:14px; font-weight:500; min-width:68px; text-align:right;">1.0×</span>
+  </div>
+</div>
+<div style="display:flex; flex-wrap:wrap; gap:16px; margin:0 0 8px; font-size:12px; color:var(--text-secondary); align-items:center;">
+  <span style="display:flex; align-items:center; gap:6px;"><span style="width:18px; height:0; border-top:2px dashed #888780;"></span>Reference star (5,000 K, area 1×)</span>
+  <span style="display:flex; align-items:center; gap:6px;"><span style="width:18px; height:0; border-top:3px solid #2a78d6;"></span>Your object</span>
+  <span style="display:flex; gap:16px; margin-left:auto;">
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="lx"> Log x-axis</label>
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="lg"> Log y-axis</label>
+  </span>
+</div>
+<div style="position:relative; width:100%; height:300px;">
+  <canvas id="bb" role="img" aria-label="Blackbody curves of luminosity per wavelength for a reference 5000 K star and an adjustable object, with ultraviolet, visible, and infrared regions shaded.">Luminosity per wavelength versus wavelength for two blackbody objects.</canvas>
+</div>
+<div style="display:flex; align-items:center; gap:16px; margin-top:16px; background:var(--surface-1); border-radius:12px; padding:1rem 1.25rem;">
+  <div id="sw" style="width:64px; height:64px; border-radius:50%; flex:none; border:0.5px solid var(--border-strong); background:#000;"></div>
+  <div style="min-width:0;">
+    <div id="nm" style="font-size:16px; font-weight:500;">Custom object</div>
+    <div id="lk" style="font-size:14px; color:var(--text-secondary);">Yellow-white</div>
+  </div>
+</div>
+<div style="margin-top:14px;">
+  <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Apparent color vs temperature (1,000 to 30,000 K, log scale)</div>
+  <div style="position:relative; height:28px;">
+    <div id="bar" style="display:flex; height:28px; border-radius:6px; overflow:hidden; border:0.5px solid var(--border-strong);"></div>
+    <div id="mk" style="position:absolute; top:-4px; height:36px; width:0; border-left:3px solid var(--text-primary); left:0;"></div>
+  </div>
+  <div id="ticks" style="position:relative; height:40px; font-size:11px; color:var(--text-secondary);"></div>
+</div>
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-top:8px;">
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:1rem;">
+    <div style="font-size:13px; color:var(--text-secondary);">Peak wavelength</div>
+    <div id="pk" style="font-size:24px; font-weight:500;">580 nm</div>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:1rem;">
+    <div style="font-size:13px; color:var(--text-secondary);">Peak lies in</div>
+    <div id="rg" style="font-size:24px; font-weight:500;">Visible</div>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:1rem;">
+    <div style="font-size:13px; color:var(--text-secondary);">Luminosity vs reference</div>
+    <div id="lum" style="font-size:24px; font-weight:500;">1×</div>
+  </div>
+  <div style="background:var(--surface-1); border-radius:var(--radius); padding:1rem;">
+    <div style="font-size:13px; color:var(--text-secondary);">Flux per area vs reference</div>
+    <div id="flx" style="font-size:24px; font-weight:500;">1×</div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const C2=1.4388e7;
+function planck(l,T){return 1/(Math.pow(l,5)*(Math.exp(C2/(l*T))-1));}
+const xs=[];const N=900,L0=20,L1=30000;
+for(let i=0;i<=N;i++)xs.push(L0*Math.pow(L1/L0,i/N));
+let norm=0;xs.forEach(l=>{norm=Math.max(norm,planck(l,5000));});
+function pts(T,A){return xs.map(l=>({x:l,y:Math.max(A*planck(l,T)/norm,1e-14)}));}
+const OBJ=[
+ {n:'Human body',T:310},{n:'Lava',T:1400},{n:'Light bulb filament',T:2700},{n:'Betelgeuse',T:3500},
+ {n:'The Sun',T:5778},{n:'Sirius',T:9900},{n:'Rigel',T:12100},{n:'Spica',T:25000}
+];
+function rgb(K){
+ const t=K/100;let r,g,b;
+ r=t<=66?255:329.698727446*Math.pow(t-60,-0.1332047592);
+ g=t<=66?99.4708025861*Math.log(t)-161.1195681661:288.1221695283*Math.pow(t-60,-0.0755148492);
+ b=t>=66?255:(t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307);
+ return [r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))));
+}
+function css(K,dim){const c=rgb(K);return 'rgb('+c.map(v=>Math.round(v*dim)).join(',')+')';}
+function dimf(K){return K>=2500?1:Math.sqrt(Math.max(0,(K-700)/1800));}
+function describe(K){
+ if(K<700)return 'No visible glow. It emits infrared only, so you would need a thermal camera.';
+ if(K<1800)return 'Dull red glow';
+ if(K<2600)return 'Orange-red';
+ if(K<3800)return 'Orange';
+ if(K<4800)return 'Yellow-orange';
+ if(K<6500)return 'Yellow-white';
+ if(K<8000)return 'White';
+ if(K<12000)return 'Blue-white';
+ return 'Blue';
+}
+const bar=document.getElementById('bar');
+for(let i=0;i<150;i++){const K=1000*Math.pow(30,i/149);const s=document.createElement('div');s.style.flex='1';s.style.background=css(K,dimf(K));bar.appendChild(s);}
+function pos(K){return Math.max(0,Math.min(1,Math.log(K/1000)/Math.log(30)));}
+const tk=document.getElementById('ticks');
+OBJ.forEach(function(o,i){
+ if(o.T<1000)return;
+ const row=[0,1,0,1,0,0,1,0][i];
+ const p=pos(o.T)*100;
+ const line=document.createElement('div');line.style.cssText='position:absolute;top:0;height:'+(row?26:12)+'px;left:'+p+'%;border-left:0.5px solid var(--border-stronger);';
+ const lab=document.createElement('div');lab.textContent=o.n.replace(' filament','')+' '+o.T.toLocaleString();
+ lab.style.cssText='position:absolute;white-space:nowrap;left:'+p+'%;transform:translateX(-50%);top:'+(row?26:12)+'px;';
+ tk.appendChild(line);tk.appendChild(lab);
+});
+const dark=matchMedia('(prefers-color-scheme: dark)').matches||document.documentElement.dataset.mode==='dark';
+const tick=dark?'#c3c2b7':'#52514e', grid=dark?'#2c2c2a':'#e1e0d9', refc=dark?'#b4b2a9':'#888780';
+const bands={id:'bands',beforeDraw(ch){
+ const {ctx,chartArea:a,scales:s}=ch;const X=v=>s.x.getPixelForValue(v);
+ const xmin=s.x.min,xmax=s.x.max,h=a.bottom-a.top;ctx.save();
+ ctx.globalAlpha=dark?0.28:0.22;
+ ctx.fillStyle='#7f77dd';ctx.fillRect(X(xmin),a.top,X(400)-X(xmin),h);
+ const g=ctx.createLinearGradient(X(400),0,X(700),0);
+ [[0,'#7a00ff'],[0.16,'#3b3bff'],[0.33,'#00a8ff'],[0.5,'#20c030'],[0.66,'#f0e020'],[0.83,'#ff8a00'],[1,'#ff1a1a']].forEach(function(p){g.addColorStop(p[0],p[1]);});
+ ctx.globalAlpha=dark?0.55:0.5;ctx.fillStyle=g;ctx.fillRect(X(400),a.top,X(700)-X(400),h);
+ ctx.globalAlpha=dark?0.24:0.16;ctx.fillStyle='#d85a30';ctx.fillRect(X(700),a.top,X(xmax)-X(700),h);
+ ctx.globalAlpha=1;ctx.fillStyle=tick;ctx.font='12px sans-serif';ctx.textAlign='center';
+ ctx.fillText('UV',(X(xmin)+X(400))/2,a.top+14);
+ ctx.fillText('Visible',(X(400)+X(700))/2,a.top+14);
+ ctx.fillText('Infrared',(X(700)+X(xmax))/2,a.top+14);
+ ctx.restore();}};
+const chart=new Chart(document.getElementById('bb'),{
+ type:'scatter',
+ data:{datasets:[
+  {label:'Reference',data:pts(5000,1),showLine:true,borderColor:refc,borderDash:[6,4],borderWidth:2,pointRadius:0,tension:0},
+  {label:'Your object',data:pts(5000,1),showLine:true,borderColor:'#2a78d6',borderWidth:3,pointRadius:0,tension:0}
+ ]},
+ options:{responsive:true,maintainAspectRatio:false,animation:{duration:120},
+  plugins:{legend:{display:false},tooltip:{enabled:false}},
+  scales:{
+   x:{type:'linear',min:50,max:3000,title:{display:true,text:'Wavelength (nm)',color:tick},ticks:{color:tick},grid:{display:false}},
+   y:{type:'linear',min:0,title:{display:true,text:'Luminosity per wavelength (relative)',color:tick},ticks:{color:tick},grid:{color:grid}}
+  }},
+ plugins:[bands]
+});
+const T=document.getElementById('T'),A=document.getElementById('A'),LG=document.getElementById('lg'),LX=document.getElementById('lx');
+let cur='Custom object';
+function fmt(v){if(v>=100)return Math.round(v).toLocaleString();if(v>=10)return v.toFixed(0);if(v>=1)return v.toFixed(1);if(v>=0.01)return v.toFixed(2);return v.toExponential(0);}
+function upd(){
+ const t=+T.value,a=+A.value;
+ document.getElementById('Tout').textContent=t.toLocaleString()+' K';
+ document.getElementById('Aout').textContent=a.toFixed(1)+'×';
+ const d=pts(t,a);chart.data.datasets[1].data=d;
+ const x=chart.options.scales.x;
+ if(LX.checked){x.type='logarithmic';x.min=20;x.max=30000;
+  x.ticks.callback=function(v){return [20,50,100,200,500,1000,2000,5000,10000,20000].indexOf(v)>=0?v.toLocaleString():'';};}
+ else{x.type='linear';x.min=50;x.max=3000;x.ticks.callback=function(v){return v;};}
+ let top=1;d.forEach(function(p){if(p.x>=x.min&&p.x<=x.max&&p.y>top)top=p.y;});
+ const y=chart.options.scales.y;
+ if(LG.checked){y.type='logarithmic';y.min=1e-10;y.max=Math.pow(10,Math.ceil(Math.log10(top*1.5)));
+  y.ticks.callback=function(v){const e=Math.log10(v);return Math.abs(e-Math.round(e))<1e-9?'1e'+Math.round(e):'';};}
+ else{y.type='linear';y.min=0;y.max=top*1.12;y.ticks.callback=function(v){return fmt(v);};}
+ chart.update();
+ const pk=2.898e6/t;
+ document.getElementById('pk').textContent=Math.round(pk).toLocaleString()+' nm';
+ document.getElementById('rg').textContent=pk<400?'Ultraviolet':(pk<=700?'Visible':'Infrared');
+ document.getElementById('lum').textContent=fmt(a*Math.pow(t/5000,4))+'×';
+ document.getElementById('flx').textContent=fmt(Math.pow(t/5000,4))+'×';
+ document.getElementById('sw').style.background=t<700?'#000':css(t,dimf(t));
+ document.getElementById('nm').textContent=cur+' · '+t.toLocaleString()+' K';
+ document.getElementById('lk').textContent=describe(t);
+ document.getElementById('mk').style.left=(pos(t)*100)+'%';
+}
+function set(t,a,name){T.value=t;A.value=a;cur=name||'Custom object';upd();}
+T.oninput=function(){cur='Custom object';upd();};A.oninput=function(){upd();};LG.onchange=upd;LX.onchange=upd;
+document.querySelectorAll('button[data-o]').forEach(function(b){b.onclick=function(){
+ const o=OBJ[+b.dataset.o];
+ if(o.T<1000){LX.checked=true;LG.checked=true;}
+ set(o.T,1,o.n);};});
+document.getElementById('b0').onclick=function(){set(5000,1);};
+document.getElementById('b1').onclick=function(){set(10000,1);};
+document.getElementById('b2').onclick=function(){set(5000,8);};
+document.getElementById('b3').onclick=function(){set(15000,0.2);};
+upd();
+</script>
